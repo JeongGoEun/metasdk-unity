@@ -23,12 +23,12 @@ namespace MetaSDK.IPFS
         public int Size;
     }
 
-    public class IPFS
+    public class IPFSClass
     {
         private readonly string ipfsAddUrl = "https://ipfs.infura.io:5001/api/v0/add";
         protected IpfsResponse resp;
 
-        public IPFS()
+        public IPFSClass()
         {
             resp = new IpfsResponse();
         }

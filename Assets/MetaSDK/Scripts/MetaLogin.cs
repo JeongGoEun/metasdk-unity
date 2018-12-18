@@ -13,8 +13,6 @@ namespace MetaSDK.Components.MetaLogin
         protected string requestUri;
         protected string sessionID;
         protected string callback;
-        Util util = new Util();
-
         // Constructor
         public MetaLogin(string data, string service, string callback, string callbackUrl)
         {
@@ -24,13 +22,13 @@ namespace MetaSDK.Components.MetaLogin
             requestUri = "meta://authentication?usage=login&service=" + service;
 
             //Uri for callback
-            if (callbackUrl != null)
+            if (! string.IsNullOrEmpty(callbackUrl))
             {
                 requestUri += "&callback=" + WWW.EscapeURL(callbackUrl);
             }
             else
             {
-                requestUri += "&callback=https%3A%2F%2F2g5198x91e.execute-api.ap-northeast-2.amazonaws.com/test?key=" + util.MakeSessionID();
+                requestUri += "&callback=https%3A%2F%2F2g5198x91e.execute-api.ap-northeast-2.amazonaws.com/test?key=" + Util.MakeSessionID();
             }
         }
 
