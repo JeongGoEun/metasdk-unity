@@ -36,7 +36,7 @@ public class MetaExample : MonoBehaviour {
         };
 
         MetaRequest request = new MetaRequest();
-        requestQR = await request.Request(requestArr, "service", callback, null);
+        requestQR = await request.Request(requestArr, "service", RequestCallbackExample, null);
     }
 
     // Update is called once per frame
@@ -79,12 +79,13 @@ public class MetaExample : MonoBehaviour {
         }
     }
    
-    public static void RequestCallbackExample(Dictionary<string, string> result)
+    public void RequestCallbackExample(Dictionary<string, string> result)
     {
         Debug.Log("RequestCallbackExample");
         foreach(KeyValuePair<string, string> item in result)
         {
             Debug.Log("MetaExample callback result: " + item.Key + item.Value);
         }
+        return;
     }
 }

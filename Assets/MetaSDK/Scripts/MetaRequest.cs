@@ -55,6 +55,11 @@ namespace MetaSDK.Components.MetaRequest
 
         public MetaRequest()
         {
+            if (timer != null)
+            {
+                timer.Dispose();
+                timer = null;
+            }
             session = Util.MakeSessionID();
             Reqinfo = new Dictionary<string, string>();
         }
@@ -63,7 +68,7 @@ namespace MetaSDK.Components.MetaRequest
         {
             request = _request;
             usage = _usage;
-            if(callback != null)
+            if(_callback != null)
             {
                 callback = _callback;
             }
@@ -135,7 +140,7 @@ namespace MetaSDK.Components.MetaRequest
             httpRequest.BeginGetResponse(new AsyncCallback((IAsyncResult ar) => {
                 HttpWebResponse response = (ar.AsyncState as HttpWebRequest).EndGetResponse(ar) as HttpWebResponse;
                 Stream respStream = response.GetResponseStream();
-                Debug.Log("begin response " + response.ResponseUri + respStream . CanRead);
+                Debug.Log("begin response " + response.ResponseUri + respStream.CanRead);
 
                 using (StreamReader reader = new StreamReader(respStream))
                 {
@@ -177,11 +182,12 @@ namespace MetaSDK.Components.MetaRequest
                                     {
                                         Reqinfo.Add(id, Encoding.UTF8.GetString(Convert.FromBase64String(json.data[id])));
                                     }
-                                    timer.Stop();
-                                    timer.Dispose();
 
                                     // Excute callback function
-                                    callback(Reqinfo);
+                                    callback?.Invoke(Reqinfo);
+
+                                    timer.Stop();
+                                    timer.Dispose();
                                 }
                             }
                         }
