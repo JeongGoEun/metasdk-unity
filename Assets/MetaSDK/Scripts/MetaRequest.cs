@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using System.Security.Cryptography;
@@ -12,35 +13,75 @@ using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
 
-
+using Org.BouncyCastle.Crypto.Engines;
+using Org.BouncyCastle.Security;
+using Org.BouncyCastle.Crypto.Modes;
+using Org.BouncyCastle.Crypto.Parameters;
 
 using MetaSDK.Tools.Util;
 using MetaSDK.IPFS;
 using MetaSDK.Components.MetaQRcode;
+using Org.BouncyCastle.Pkcs;
+using Org.BouncyCastle.Crypto;
+
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 /*
 Start -> Initialization -> Load -> Validation -> Events -> Render
 */
 namespace MetaSDK.Components.MetaRequest
 {
+    public class RequestJson
+    {
+        public string meta_id { get; set; }
+        public string signature { get; set; }
+        public Dictionary<string, string> data { get; set; }
+    }
+
     public class MetaRequest
     {
         private static Timer timer;
         private static string session;
-        private string pubKey, privKey;
-        protected string trxRequestUri, baseRequestUri;
+
+        private string pubKey = "";
+        private string privKey = "";
+
+        // Get
         Action<string> callback;
+        string[] request;
+        string usage, callbackUrl;
+        public Dictionary<string, string> Reqinfo { get; set; }
 
         public MetaRequest()
         {
             session = Util.MakeSessionID();
-            trxRequestUri = "";
-            baseRequestUri = "";
+            Reqinfo = new Dictionary<string, string>();
+        }
+
+        private void Init(string[] _request, string _usage, Action<string> _callback, string _callbackUrl)
+        {
+            request = _request;
+            usage = _usage;
+            if(callback != null)
+            {
+                callback = _callback;
+            }
+            if (!string.IsNullOrEmpty(_callbackUrl))
+            {
+                callbackUrl = _callbackUrl;
+            }
         }
 
         // Array request, string service, Action<string> callback, string callbackUrl
         public async Task<Texture2D> Request(string[] request, string usage, Action<string> callback, string callbackUrl) 
         {
+            // Init class instance
+            //Init(request, usage, callback, callbackUrl);
+
+            // Uri for request transaction
+            string baseRequestUri = "", trxRequestUri = "";
+
             // Get RSA key(public key, private key)
             Util.GetRSAKey(out pubKey, out privKey);
 
@@ -57,7 +98,6 @@ namespace MetaSDK.Components.MetaRequest
             }
             else
             {
-                this.callback = callback;
                 baseRequestUri += "&c=https%3A%2F%2F0s5eebblre.execute-api.ap-northeast-2.amazonaws.com/dev?key=" + session;
             }
 
@@ -67,12 +107,12 @@ namespace MetaSDK.Components.MetaRequest
             // URI for public key
             baseRequestUri += "&p=" + WWW.EscapeURL(pubKey);
 
-            Debug.Log("Request trxRequestUri: " + baseRequestUri);
+            Debug.Log("baseRequestUri: " + baseRequestUri);
 
             // URI for IPFS
             IPFSClass ipfs = new IPFSClass();
             trxRequestUri = await ipfs.IpfsAdd(baseRequestUri);
-            Debug.Log("trxRequest IPFS hash: " + trxRequestUri);
+            Debug.Log("trxRequestUri(IPFS hash): " + trxRequestUri);
 
             // Polling request using timer
             timer = new Timer { Interval = 2000 };
@@ -88,27 +128,65 @@ namespace MetaSDK.Components.MetaRequest
         private void HttpRequest(System.Object source, System.Timers.ElapsedEventArgs e)
         {
             string httpRequestUrl = "https://0s5eebblre.execute-api.ap-northeast-2.amazonaws.com/dev?key=" + session;
+            RequestJson json;
 
-            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(httpRequestUrl);
-            request.BeginGetResponse(new AsyncCallback((IAsyncResult ar) => {
+            HttpWebRequest httpRequest = (HttpWebRequest)WebRequest.Create(httpRequestUrl);
+            httpRequest.BeginGetResponse(new AsyncCallback((IAsyncResult ar) => {
                 HttpWebResponse response = (ar.AsyncState as HttpWebRequest).EndGetResponse(ar) as HttpWebResponse;
                 Stream respStream = response.GetResponseStream();
-                using(StreamReader reader = new StreamReader(respStream))
+                Debug.Log("begin response " + response.ResponseUri + respStream . CanRead);
+
+
+                using (StreamReader reader = new StreamReader(respStream))
                 {
-                    if(!string.IsNullOrEmpty(reader.ReadToEnd()))
+                    string result = reader.ReadToEnd();
+                    Debug.Log("response result " + result);
+
+                    if (!string.IsNullOrEmpty(result))
                     {
                         // Decryption using privKey
+                        byte[] respBytes = Convert.FromBase64String(result);
 
-                        /*
-                        byte[] csrEncode = Convert.FromBase64CharArray(characters, 0, characters.Length);
-                        Pkcs10CertificationRequest decodedCsr = new Pkcs10CertificationRequest(csrEncode);
-                        Console.WriteLine(decodedCsr.GetCertificationRequestInfo().Subject);
-                        */
+                        // Get response data to byte array
+                        byte[] encryptedAesKey = respBytes.Take(256).ToArray<byte>();
+                        byte[] encryptedData = respBytes.Skip(256).Take(respBytes.Length).ToArray<byte>();
 
+                        // Step1. aes키는 rsa로 암호화 되어있는데 private key로 풀어야 한다.
+                        IBufferedCipher cipher = CipherUtilities.GetCipher("RSA/NONE/PKCS1Padding");
+                        RsaKeyParameters privateKey = (RsaKeyParameters)Util.pairKey.Private;
+                        cipher.Init(false, privateKey);
+                        byte[] secret = cipher.DoFinal(encryptedAesKey);
+
+                        // Step2. data decryption using AES algorithm with secret key
+                        AesManaged aes = new AesManaged {
+                            Key = secret,
+                            IV = new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+                            Mode = CipherMode.ECB
+                        };
+
+                        // Step3. Decryption data using secret key
+                        ICryptoTransform decryptor = aes.CreateDecryptor(aes.Key, aes.IV);
+                        using(MemoryStream ms = new MemoryStream(encryptedData))
+                        {
+                            using(CryptoStream cs = new CryptoStream(ms, decryptor, CryptoStreamMode.Read))
+                            {
+                                using(StreamReader sr = new StreamReader(cs))
+                                {
+                                    string plain = sr.ReadToEnd();
+                                    json = JsonConvert.DeserializeObject<RequestJson>(plain);
+
+                                    foreach (string id in this.request)
+                                    {
+                                        Reqinfo.Add(id, Encoding.UTF8.GetString(Convert.FromBase64String(json.data[id])));
+                                    }
+                                    //callback(Reqinfo);
+                                }
+                            }
+                        }
                         timer.Dispose();
                     }
                 }
-            }), request);
+            }), httpRequest);
         }
     }
 }

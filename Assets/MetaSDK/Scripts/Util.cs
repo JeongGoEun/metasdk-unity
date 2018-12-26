@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Security.Cryptography;
 
 using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.Crypto.Generators;
@@ -16,6 +17,8 @@ namespace MetaSDK.Tools.Util
 {
     public static class Util
     {
+        public static AsymmetricCipherKeyPair pairKey;
+
         public static string MakeSessionID() {
             string text = "";
             string possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -31,19 +34,21 @@ namespace MetaSDK.Tools.Util
 
         public static void GetRSAKey(out string pubKey, out string privKey)
         {
+            // Generate key pair(public, private)
             RsaKeyPairGenerator generator = new RsaKeyPairGenerator();
             generator.Init(new KeyGenerationParameters(new SecureRandom(), 2048));
-            var pairKey = generator.GenerateKeyPair();
+            pairKey = generator.GenerateKeyPair();
 
+            // Inject public key from key pair
             SubjectPublicKeyInfo pubKeyInfo = SubjectPublicKeyInfoFactory.CreateSubjectPublicKeyInfo(pairKey.Public);
             byte[] serializedPubBytes = pubKeyInfo.ToAsn1Object().GetDerEncoded();
             pubKey = Convert.ToBase64String(serializedPubBytes);
 
+            // Inject private key from key pair
             PrivateKeyInfo privKeyInfo = PrivateKeyInfoFactory.CreatePrivateKeyInfo(pairKey.Private);
             byte[] serializedPrivBytes = privKeyInfo.ToAsn1Object().GetDerEncoded();
             privKey = Convert.ToBase64String(serializedPrivBytes);
-
-
         }
+
     }
 }

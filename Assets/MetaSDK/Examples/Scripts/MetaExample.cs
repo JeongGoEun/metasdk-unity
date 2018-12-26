@@ -13,11 +13,10 @@ using MetaSDK.Components.MetaLogin;
 using MetaSDK.Components.MetaRequest;
 using MetaSDK.Components.MetaQRcode;
 
-public delegate void CallBack();
+public delegate void CallBack(string result);
 
 public class MetaExample : MonoBehaviour {
     bool isLogin = false, isRequest = false, isTransaction = false;
-    MetaRequest request = new MetaRequest();
     Texture2D requestQR;
 
     async void Start () {
@@ -25,9 +24,11 @@ public class MetaExample : MonoBehaviour {
         requestUri = metaLogin.GetRequestUri();
         Debug.Log("Login Request Uri: " + requestUri);*/
 
-        // Example for MetaRequest
+        // Example for MetaRequest and result
         string[] requestArr = { "10", "2" };
+        //Dictionary<string, string> ReqResult = new Dictionary<string, string>();
         Action<String> callback = (x) => { Debug.Log("Callback: " + x); };
+        MetaRequest request = new MetaRequest();
         requestQR = await request.Request(requestArr, "service", callback, null);
     }
 
@@ -40,23 +41,22 @@ public class MetaExample : MonoBehaviour {
     {
         if (isLogin)
         {
-            Debug.Log("OnGUI isLogin");
+            //Debug.Log("OnGUI isLogin");
         }
         else if (isRequest)
         {
-            Debug.Log("OnGUI isRequest");
+            //Debug.Log("OnGUI isRequest");
             GUI.DrawTexture(new Rect(0, 0, 256, 256), requestQR);
         }
         else if (isTransaction)
         {
-            Debug.Log("OnGUI isTransaction");
+            //Debug.Log("OnGUI isTransaction");
         }
     }
 
     public void OnClick() {
         Button curButton = EventSystem.current.currentSelectedGameObject.GetComponent<Button>();
         string curButtonName = curButton.name;
-        Debug.Log("OnClick button: " + curButtonName);
 
         switch (curButtonName)
         {
@@ -71,9 +71,13 @@ public class MetaExample : MonoBehaviour {
                 break;
         }
     }
-
-    public static void CallbackExample()
+   
+    public static void RequestCallbackExample(Dictionary<string, string> result)
     {
-        Debug.Log("CallbackExample");
+        Debug.Log("RequestCallbackExample");
+        foreach(KeyValuePair<string, string> item in result)
+        {
+            Debug.Log("MetaExample callback result: " + item.Key + item.Value);
+        }
     }
 }
