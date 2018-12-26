@@ -48,7 +48,7 @@ namespace MetaSDK.Components.MetaRequest
         private string privKey = "";
 
         // Get
-        Action<string> callback;
+        Action<Dictionary<string, string>> callback;
         string[] request;
         string usage, callbackUrl;
         public Dictionary<string, string> Reqinfo { get; set; }
@@ -59,7 +59,7 @@ namespace MetaSDK.Components.MetaRequest
             Reqinfo = new Dictionary<string, string>();
         }
 
-        private void Init(string[] _request, string _usage, Action<string> _callback, string _callbackUrl)
+        private void Init(string[] _request, string _usage, Action<Dictionary<string, string>> _callback, string _callbackUrl)
         {
             request = _request;
             usage = _usage;
@@ -74,10 +74,10 @@ namespace MetaSDK.Components.MetaRequest
         }
 
         // Array request, string service, Action<string> callback, string callbackUrl
-        public async Task<Texture2D> Request(string[] request, string usage, Action<string> callback, string callbackUrl) 
+        public async Task<Texture2D> Request(string[] request, string usage, Action<Dictionary<string, string>> callback, string callbackUrl) 
         {
             // Init class instance
-            //Init(request, usage, callback, callbackUrl);
+            Init(request, usage, callback, callbackUrl);
 
             // Uri for request transaction
             string baseRequestUri = "", trxRequestUri = "";
@@ -119,6 +119,7 @@ namespace MetaSDK.Components.MetaRequest
             timer.Elapsed += HttpRequest;
             timer.AutoReset = true;
             timer.Enabled = true;
+            timer.Start();
 
             // Make QRCode for request
             MetaQR metaQR = new MetaQR();
@@ -136,12 +137,9 @@ namespace MetaSDK.Components.MetaRequest
                 Stream respStream = response.GetResponseStream();
                 Debug.Log("begin response " + response.ResponseUri + respStream . CanRead);
 
-
                 using (StreamReader reader = new StreamReader(respStream))
                 {
                     string result = reader.ReadToEnd();
-                    Debug.Log("response result " + result);
-
                     if (!string.IsNullOrEmpty(result))
                     {
                         // Decryption using privKey
@@ -179,11 +177,14 @@ namespace MetaSDK.Components.MetaRequest
                                     {
                                         Reqinfo.Add(id, Encoding.UTF8.GetString(Convert.FromBase64String(json.data[id])));
                                     }
-                                    //callback(Reqinfo);
+                                    timer.Stop();
+                                    timer.Dispose();
+
+                                    // Excute callback function
+                                    callback(Reqinfo);
                                 }
                             }
                         }
-                        timer.Dispose();
                     }
                 }
             }), httpRequest);

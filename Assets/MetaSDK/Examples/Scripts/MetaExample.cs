@@ -26,8 +26,15 @@ public class MetaExample : MonoBehaviour {
 
         // Example for MetaRequest and result
         string[] requestArr = { "10", "2" };
-        //Dictionary<string, string> ReqResult = new Dictionary<string, string>();
-        Action<String> callback = (x) => { Debug.Log("Callback: " + x); };
+        Action<Dictionary<string, string>> callback = (result) => {
+            Debug.Log("RequestCallbackExample");
+            foreach (KeyValuePair<string, string> item in result)
+            {
+                Debug.Log("MetaExample callback result: " + item.Key + item.Value);
+            }
+            return;
+        };
+
         MetaRequest request = new MetaRequest();
         requestQR = await request.Request(requestArr, "service", callback, null);
     }

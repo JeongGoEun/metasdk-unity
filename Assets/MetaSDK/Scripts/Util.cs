@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Security.Cryptography;
+using System.Timers;
+using System.Threading.Tasks;
 
 using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.Crypto.Generators;
@@ -19,16 +21,18 @@ namespace MetaSDK.Tools.Util
     {
         public static AsymmetricCipherKeyPair pairKey;
 
-        public static string MakeSessionID() {
+        public static string MakeSessionID()
+        {
             string text = "";
             string possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
             Random rand = new Random();
-            for (int i = 0; i < 8; i++) {
+            for (int i = 0; i < 8; i++)
+            {
                 text += possible[rand.Next() % possible.Length];
             }
 
-            Debug.WriteLine("Util.MakeSessionID: "+text);
+            Debug.WriteLine("Util.MakeSessionID: " + text);
             return text;
         }
 
@@ -49,6 +53,5 @@ namespace MetaSDK.Tools.Util
             byte[] serializedPrivBytes = privKeyInfo.ToAsn1Object().GetDerEncoded();
             privKey = Convert.ToBase64String(serializedPrivBytes);
         }
-
     }
 }
