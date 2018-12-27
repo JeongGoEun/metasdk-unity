@@ -10,10 +10,12 @@ namespace MetaSDK.Components.MetaQRcode
 {
     public class MetaQR
     {
+        private Texture2D encoded;
+
         // Defalut size: 128
         public Texture2D MakeQR(string value)
         {
-            var encoded = new Texture2D(128, 128);
+            encoded = new Texture2D(128, 128);
             var color32 = Encode(value, encoded.width, encoded.height);
             encoded.SetPixels32(color32);
             encoded.Apply();
@@ -21,9 +23,10 @@ namespace MetaSDK.Components.MetaQRcode
             return encoded;
         }
 
+        // Custom size
         public Texture2D MakeQR(int size, string value)
         {
-            var encoded = new Texture2D(size, size);
+            encoded = new Texture2D(size, size);
             var color32 = Encode(value, encoded.width, encoded.height);
             encoded.SetPixels32(color32);
             encoded.Apply();

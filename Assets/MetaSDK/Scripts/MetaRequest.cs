@@ -32,7 +32,7 @@ Start -> Initialization -> Load -> Validation -> Events -> Render
 */
 namespace MetaSDK.Components.MetaRequest
 {
-    public class RequestJson
+    class RequestJson
     {
         public string meta_id { get; set; }
         public string signature { get; set; }

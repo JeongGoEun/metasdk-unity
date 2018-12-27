@@ -9,9 +9,21 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
+using Nethereum.Web3;
+using Nethereum.ABI.FunctionEncoding.Attributes;
+using Nethereum.Contracts.CQS;
+using Nethereum.Util;
+using Nethereum.Web3.Accounts;
+using Nethereum.Hex.HexConvertors.Extensions;
+using Nethereum.Contracts;
+using Nethereum.Contracts.Extensions;
+using System.Numerics;
+
 using MetaSDK.Components.MetaLogin;
 using MetaSDK.Components.MetaRequest;
+using MetaSDK.Components.MetaTransaction;
 using MetaSDK.Components.MetaQRcode;
+using Nethereum.StandardTokenEIP20.ContractDefinition;
 
 public delegate void CallBack(string result);
 
@@ -24,19 +36,19 @@ public class MetaExample : MonoBehaviour {
         requestUri = metaLogin.GetRequestUri();
         Debug.Log("Login Request Uri: " + requestUri);*/
 
-        // Example for MetaRequest and result
+        /*
+        // Example for MetaRequest
         string[] requestArr = { "10", "2" };
-        Action<Dictionary<string, string>> callback = (result) => {
-            Debug.Log("RequestCallbackExample");
-            foreach (KeyValuePair<string, string> item in result)
-            {
-                Debug.Log("MetaExample callback result: " + item.Key + item.Value);
-            }
-            return;
-        };
-
         MetaRequest request = new MetaRequest();
         requestQR = await request.Request(requestArr, "service", RequestCallbackExample, null);
+        */
+
+        string to = "0x8101487270f5411cf213b8d348a2ab46df66245d";
+        var value = Web3.Convert.ToWei(0.01, UnitConversion.EthUnit.Ether);
+        string data = "data";
+
+        MetaTransaction metaTransaction = new MetaTransaction(to, value, data, "usage", SendTransactionCallbackExample, null);
+        requestQR = await metaTransaction.SendTransaction();
     }
 
     // Update is called once per frame
@@ -58,6 +70,7 @@ public class MetaExample : MonoBehaviour {
         else if (isTransaction)
         {
             //Debug.Log("OnGUI isTransaction");
+            GUI.DrawTexture(new Rect(0, 0, 256, 256), requestQR);
         }
     }
 
@@ -86,6 +99,12 @@ public class MetaExample : MonoBehaviour {
         {
             Debug.Log("MetaExample callback result: " + item.Key + item.Value);
         }
+        return;
+    }
+
+    public void SendTransactionCallbackExample(Dictionary<string, string> result)
+    {
+        Debug.Log("SendTransactionCallbackExample");
         return;
     }
 }
