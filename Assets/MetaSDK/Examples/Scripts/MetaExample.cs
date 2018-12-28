@@ -29,26 +29,25 @@ public delegate void CallBack(string result);
 
 public class MetaExample : MonoBehaviour {
     bool isLogin = false, isRequest = false, isTransaction = false;
-    Texture2D requestQR;
+    Texture2D requestQR, sendTransactionQR;
 
     async void Start () {
-        /*MetaLogin metaLogin = new MetaLogin("data", "service", "callback", "callbackUrl");
-        requestUri = metaLogin.GetRequestUri();
-        Debug.Log("Login Request Uri: " + requestUri);*/
 
-        /*
+        // Example for MetaLogin
+        MetaLogin metaLogin = new MetaLogin("data", "service", "callback", "callbackUrl");
+        Debug.Log("Login Request Uri: " + metaLogin.GetRequestUri());
+
         // Example for MetaRequest
         string[] requestArr = { "10", "2" };
         MetaRequest request = new MetaRequest();
         requestQR = await request.Request(requestArr, "service", RequestCallbackExample, null);
-        */
 
+        // Example for MetaTransaction
         string to = "0x8101487270f5411cf213b8d348a2ab46df66245d";
         var value = Web3.Convert.ToWei(0.01, UnitConversion.EthUnit.Ether);
         string data = "data";
-
-        MetaTransaction metaTransaction = new MetaTransaction(to, value, data, "usage", SendTransactionCallbackExample, null);
-        requestQR = await metaTransaction.SendTransaction();
+        MetaTransaction metaTransaction = new MetaTransaction(to, value, data, "usageExample", SendTransactionCallbackExample, null);
+        sendTransactionQR = await metaTransaction.SendTransaction();
     }
 
     // Update is called once per frame
@@ -70,7 +69,7 @@ public class MetaExample : MonoBehaviour {
         else if (isTransaction)
         {
             //Debug.Log("OnGUI isTransaction");
-            GUI.DrawTexture(new Rect(0, 0, 256, 256), requestQR);
+            GUI.DrawTexture(new Rect(0, 0, 256, 256), sendTransactionQR);
         }
     }
 

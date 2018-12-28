@@ -50,7 +50,6 @@ namespace MetaSDK.Components.MetaTransaction
             Init(to, value, data, usage, callback, callbackUrl);
             if (timer != null)
             {
-                Debug.Log("timer dispose");
                 timer.Stop();
                 timer.Dispose();
                 timer = null;
@@ -133,7 +132,6 @@ namespace MetaSDK.Components.MetaTransaction
                     if (!string.IsNullOrEmpty(result))
                     {
                         json = JsonConvert.DeserializeObject<SendTransactionJson>(result);
-
                         Debug.Log("SendTransaction result: " + result);
 
                         // Excute callback function
