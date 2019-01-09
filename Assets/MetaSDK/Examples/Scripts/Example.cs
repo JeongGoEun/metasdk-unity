@@ -19,34 +19,34 @@ using Nethereum.Contracts;
 using Nethereum.Contracts.Extensions;
 using System.Numerics;
 
-using MetaSDK.Components.MetaLogin;
-using MetaSDK.Components.MetaRequest;
-using MetaSDK.Components.MetaTransaction;
-using MetaSDK.Components.MetaQRcode;
+using MetaSDK.Components.Login;
+using MetaSDK.Components.Request;
+using MetaSDK.Components.Transaction;
+using MetaSDK.Components.QRcode;
 using Nethereum.StandardTokenEIP20.ContractDefinition;
 
 public delegate void CallBack(string result);
 
-public class MetaExample : MonoBehaviour {
+public class Example : MonoBehaviour {
     bool isLogin = false, isRequest = false, isTransaction = false;
     Texture2D requestQR, sendTransactionQR;
 
     async void Start () {
 
         // Example for MetaLogin
-        MetaLogin metaLogin = new MetaLogin("data", "service", "callback", "callbackUrl");
+        Login metaLogin = new Login("data", "service", "callback", "callbackUrl");
         Debug.Log("Login Request Uri: " + metaLogin.GetRequestUri());
 
         // Example for MetaRequest
-        string[] requestArr = { "10", "2" };
-        MetaRequest request = new MetaRequest();
-        requestQR = await request.Request(requestArr, "service", RequestCallbackExample, null);
+        string[] requestArr = { "2", "10" };
+        Request request = new Request(requestArr, "service", RequestCallbackExample, null);
+        requestQR = await request.GetRequestQR();
 
         // Example for MetaTransaction
         string to = "0x8101487270f5411cf213b8d348a2ab46df66245d";
         var value = Web3.Convert.ToWei(0.01, UnitConversion.EthUnit.Ether);
         string data = "data";
-        MetaTransaction metaTransaction = new MetaTransaction(to, value, data, "usageExample", SendTransactionCallbackExample, null);
+        Transaction metaTransaction = new Transaction(to, value, data, "usageExample", SendTransactionCallbackExample, null);
         sendTransactionQR = await metaTransaction.SendTransaction();
     }
 

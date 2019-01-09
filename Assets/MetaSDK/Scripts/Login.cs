@@ -6,15 +6,15 @@ using ZXing;
 using ZXing.QrCode;
 using MetaSDK.Tools.Util;
 
-namespace MetaSDK.Components.MetaLogin
+namespace MetaSDK.Components.Login
 {
-    public class MetaLogin
+    public class Login
     {
         protected string requestUri;
         protected string sessionID;
         protected string callback;
         // Constructor
-        public MetaLogin(string data, string service, string callback, string callbackUrl)
+        public Login(string data, string service, string callback, string callbackUrl)
         {
             this.callback = callback;
 

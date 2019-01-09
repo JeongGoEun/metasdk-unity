@@ -6,16 +6,14 @@ using ZXing;
 using ZXing.QrCode;
 using MetaSDK.Tools.Util;
 
-namespace MetaSDK.Components.MetaQRcode
+namespace MetaSDK.Components.QRcode
 {
-    public class MetaQR
+    public class QRcode
     {
-        private Texture2D encoded;
-
         // Defalut size: 128
         public Texture2D MakeQR(string value)
         {
-            encoded = new Texture2D(128, 128);
+            Texture2D encoded = new Texture2D(128, 128);
             var color32 = Encode(value, encoded.width, encoded.height);
             encoded.SetPixels32(color32);
             encoded.Apply();
@@ -26,7 +24,7 @@ namespace MetaSDK.Components.MetaQRcode
         // Custom size
         public Texture2D MakeQR(int size, string value)
         {
-            encoded = new Texture2D(size, size);
+            Texture2D encoded = new Texture2D(size, size);
             var color32 = Encode(value, encoded.width, encoded.height);
             encoded.SetPixels32(color32);
             encoded.Apply();

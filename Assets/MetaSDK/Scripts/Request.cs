@@ -20,7 +20,7 @@ using Org.BouncyCastle.Crypto.Parameters;
 
 using MetaSDK.Tools.Util;
 using MetaSDK.IPFS;
-using MetaSDK.Components.MetaQRcode;
+using MetaSDK.Components.QRcode;
 using Org.BouncyCastle.Pkcs;
 using Org.BouncyCastle.Crypto;
 
@@ -30,7 +30,7 @@ using Newtonsoft.Json.Linq;
 /*
 Start -> Initialization -> Load -> Validation -> Events -> Render
 */
-namespace MetaSDK.Components.MetaRequest
+namespace MetaSDK.Components.Request
 {
     class RequestJson
     {
@@ -39,7 +39,7 @@ namespace MetaSDK.Components.MetaRequest
         public Dictionary<string, string> data { get; set; }
     }
 
-    public class MetaRequest
+    public class Request
     {
         private static Timer timer;
         private static string session;
@@ -53,8 +53,11 @@ namespace MetaSDK.Components.MetaRequest
         string usage, callbackUrl;
         public Dictionary<string, string> Reqinfo { get; set; }
 
-        public MetaRequest()
+        public Request(string[] _request, string _usage, Action<Dictionary<string, string>> _callback, string _callbackUrl)
         {
+            // Init class instance
+            Init(_request, _usage, _callback, _callbackUrl);
+
             if (timer != null)
             {
                 timer.Dispose();
@@ -79,11 +82,8 @@ namespace MetaSDK.Components.MetaRequest
         }
 
         // Array request, string service, Action<string> callback, string callbackUrl
-        public async Task<Texture2D> Request(string[] request, string usage, Action<Dictionary<string, string>> callback, string callbackUrl) 
+        public async Task<Texture2D> GetRequestQR() 
         {
-            // Init class instance
-            Init(request, usage, callback, callbackUrl);
-
             // Uri for request transaction
             string baseRequestUri = "", trxRequestUri = "";
 
@@ -127,7 +127,7 @@ namespace MetaSDK.Components.MetaRequest
             timer.Start();
 
             // Make QRCode for request
-            MetaQR metaQR = new MetaQR();
+            QRcode.QRcode metaQR = new QRcode.QRcode();
             return metaQR.MakeQR(256, trxRequestUri);
         }
 

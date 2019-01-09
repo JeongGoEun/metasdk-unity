@@ -16,14 +16,14 @@ using UnityEngine.UI;
 
 using MetaSDK.Tools.Util;
 using MetaSDK.IPFS;
-using MetaSDK.Components.MetaQRcode;
+using MetaSDK.Components.QRcode;
 
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 using Nethereum.Hex.HexConvertors.Extensions;
 
-namespace MetaSDK.Components.MetaTransaction
+namespace MetaSDK.Components.Transaction
 {
     class SendTransactionJson
     {
@@ -31,7 +31,7 @@ namespace MetaSDK.Components.MetaTransaction
         public string address { get; set; }
     }
 
-    public class MetaTransaction
+    public class Transaction
     {
         private static Timer timer;
         private static string session;
@@ -45,7 +45,7 @@ namespace MetaSDK.Components.MetaTransaction
         // Return data form
         public Dictionary<string, string> Reqinfo { get; set; }
 
-        public MetaTransaction(string to, BigInteger value, string data, string usage, Action<Dictionary<string, string>> callback, string callbackUrl) 
+        public Transaction(string to, BigInteger value, string data, string usage, Action<Dictionary<string, string>> callback, string callbackUrl) 
         {
             Init(to, value, data, usage, callback, callbackUrl);
             if (timer != null)
@@ -111,7 +111,7 @@ namespace MetaSDK.Components.MetaTransaction
             timer.Start();
 
             // Make QRCode for request
-            MetaQR metaQR = new MetaQR();
+            QRcode.QRcode metaQR = new QRcode.QRcode();
             return metaQR.MakeQR(256, trxRequestUri);
         }
 
