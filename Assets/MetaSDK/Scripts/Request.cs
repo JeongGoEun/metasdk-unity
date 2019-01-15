@@ -112,12 +112,12 @@ namespace MetaSDK.Components.Request
             // URI for public key
             baseRequestUri += "&p=" + WWW.EscapeURL(pubKey);
 
-            Debug.Log("baseRequestUri: " + baseRequestUri);
+            Debug.Log("Request baseRequestUri: " + baseRequestUri);
 
             // URI for IPFS
             IPFSClass ipfs = new IPFSClass();
             trxRequestUri = await ipfs.IpfsAdd(baseRequestUri);
-            Debug.Log("trxRequestUri(IPFS hash): " + trxRequestUri);
+            Debug.Log("Request trxRequestUri(IPFS hash): " + trxRequestUri);
 
             // Polling request using timer
             timer = new Timer { Interval = 2000 };
@@ -140,7 +140,7 @@ namespace MetaSDK.Components.Request
             httpRequest.BeginGetResponse(new AsyncCallback((IAsyncResult ar) => {
                 HttpWebResponse response = (ar.AsyncState as HttpWebRequest).EndGetResponse(ar) as HttpWebResponse;
                 Stream respStream = response.GetResponseStream();
-                Debug.Log("begin response " + response.ResponseUri + respStream.CanRead);
+                Debug.Log("Request begin response " + response.ResponseUri + respStream.CanRead);
 
                 using (StreamReader reader = new StreamReader(respStream))
                 {
@@ -194,6 +194,14 @@ namespace MetaSDK.Components.Request
                     }
                 }
             }), httpRequest);
+        }
+
+        public void TimerTrigger()
+        {
+            if (timer != null)
+            {
+                timer.Dispose();
+            }
         }
     }
 }

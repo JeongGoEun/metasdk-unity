@@ -31,23 +31,27 @@ public class Example : MonoBehaviour {
     bool isLogin = false, isRequest = false, isTransaction = false;
     Texture2D requestQR, sendTransactionQR;
 
+    Login metaLogin;
+    Request request;
+    Transaction transaction;
+
     async void Start () {
 
         // Example for MetaLogin
-        Login metaLogin = new Login("data", "service", "callback", "callbackUrl");
+        metaLogin = new Login("data", "service", "callback", "callbackUrl");
         Debug.Log("Login Request Uri: " + metaLogin.GetRequestUri());
 
         // Example for MetaRequest
         string[] requestArr = { "2", "10" };
-        Request request = new Request(requestArr, "service", RequestCallbackExample, null);
+        request = new Request(requestArr, "service", RequestCallbackExample, null);
         requestQR = await request.GetRequestQR();
 
         // Example for MetaTransaction
         string to = "0x8101487270f5411cf213b8d348a2ab46df66245d";
         var value = Web3.Convert.ToWei(0.01, UnitConversion.EthUnit.Ether);
         string data = "data";
-        Transaction metaTransaction = new Transaction(to, value, data, "usageExample", SendTransactionCallbackExample, null);
-        sendTransactionQR = await metaTransaction.SendTransaction();
+        transaction = new Transaction(to, value, data, "usageExample", SendTransactionCallbackExample, null);
+        sendTransactionQR = await transaction.SendTransaction();
     }
 
     // Update is called once per frame
@@ -80,13 +84,21 @@ public class Example : MonoBehaviour {
         switch (curButtonName)
         {
             case "LoginBtn":
-                isLogin = true;
+                isLogin = !isLogin;
                 break;
             case "RequestBtn":
-                isRequest = true;
+                isRequest = !isRequest;
+                if (!isRequest)
+                {
+                    request.TimerTrigger();
+                }
                 break;
             case "TransactionBtn":
-                isTransaction = true;
+                isTransaction = !isTransaction;
+                if (! isTransaction)
+                {
+                    transaction.TimerTrigger();
+                }
                 break;
         }
     }

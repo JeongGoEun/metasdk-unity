@@ -96,12 +96,12 @@ namespace MetaSDK.Components.Transaction
                 baseRequestUri += "&c=https%3A%2F%2F0s5eebblre.execute-api.ap-northeast-2.amazonaws.com/dev?key=" + session;
             }
 
-            Debug.Log("baseRequestUri: " + baseRequestUri);
+            Debug.Log("Transaction baseRequestUri: " + baseRequestUri);
 
             // URI for IPFS
             IPFSClass ipfs = new IPFSClass();
             trxRequestUri = await ipfs.IpfsAdd(baseRequestUri);
-            Debug.Log("trxRequestUri(IPFS hash): " + trxRequestUri);
+            Debug.Log("Transaction trxRequestUri(IPFS hash): " + trxRequestUri);
 
             // Polling request using timer
             timer = new Timer { Interval = 2000 };
@@ -124,7 +124,7 @@ namespace MetaSDK.Components.Transaction
             httpRequest.BeginGetResponse(new AsyncCallback((IAsyncResult ar) => {
                 HttpWebResponse response = (ar.AsyncState as HttpWebRequest).EndGetResponse(ar) as HttpWebResponse;
                 Stream respStream = response.GetResponseStream();
-                Debug.Log("begin response " + response.ResponseUri + respStream.CanRead);
+                Debug.Log("Transaction begin response " + response.ResponseUri + respStream.CanRead);
 
                 using (StreamReader reader = new StreamReader(respStream))
                 {
@@ -132,7 +132,7 @@ namespace MetaSDK.Components.Transaction
                     if (!string.IsNullOrEmpty(result))
                     {
                         json = JsonConvert.DeserializeObject<SendTransactionJson>(result);
-                        Debug.Log("SendTransaction result: " + result);
+                        Debug.Log("Transaction SendTransaction result: " + result);
 
                         // Excute callback function
                         callback?.Invoke(Reqinfo);
@@ -142,6 +142,14 @@ namespace MetaSDK.Components.Transaction
                     }
                 }
             }), httpRequest);
+        }
+
+        public void TimerTrigger()
+        {
+            if (timer != null)
+            {
+                timer.Dispose();
+            }
         }
     }
 }
