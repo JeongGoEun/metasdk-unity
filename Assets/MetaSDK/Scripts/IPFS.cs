@@ -40,11 +40,10 @@ namespace MetaSDK.IPFS
 
         private async Task<string> HttpPost(string ipfsData)
         {
-            byte[] file_bytes = Encoding.ASCII.GetBytes(ipfsData);
             HttpClient httpClient = new HttpClient();
             MultipartFormDataContent form = new MultipartFormDataContent();
 
-            form.Add(new ByteArrayContent(file_bytes, 0, file_bytes.Length), "file", "ipfs.txt");
+            form.Add(new ByteArrayContent(Encoding.ASCII.GetBytes(ipfsData)));
             HttpResponseMessage response = await httpClient.PostAsync(ipfsAddUrl, form);
 
             response.EnsureSuccessStatusCode();

@@ -1,1 +1,0 @@
-﻿meta://authentication?usage=login&service=service&callback=callbackUrl
